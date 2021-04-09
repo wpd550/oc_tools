@@ -251,8 +251,28 @@ static float kWAYWindowDefaultTrafficLightButtonsTopMargin = 0;
 }
 
 - (void) setHidesTitle:(BOOL)hidesTitle {
-//	_hidesTitle = hidesTitle;
-	[self setTitleVisibility:hidesTitle ? NSWindowTitleHidden : NSWindowTitleVisible];
+	_hidesTitle = hidesTitle;
+//	[self setTitleVisibility:hidesTitle ? NSWindowTitleHidden : NSWindowTitleVisible];
+    
+    
+    if(self.title && !_hidesTitle)
+    {
+        self.titleLabel = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 20)];
+        self.titleLabel.stringValue = self.title;
+        [self.titleLabel setEditable:NO];
+        [self.titleLabel setSelectable:NO];
+        [self.titleLabel setFont:[NSFont systemFontOfSize:16]];
+        [self.titleLabel sizeToFit];
+        self.titleLabel.backgroundColor = [NSColor clearColor];
+        self.titleLabel.bordered = NO;
+        self.titleLabel.drawsBackground = NO;
+        [self.titleView addSubview:_titleLabel];
+    }else{
+        if(_titleLabel)
+        {
+            [_titleLabel removeFromSuperview];
+        }
+    }
 }
 
 - (void) setContentViewAppearanceVibrantDark {
@@ -327,7 +347,7 @@ static float kWAYWindowDefaultTrafficLightButtonsTopMargin = 0;
 	_delegateProxy = [[WAYWindowDelegateProxy alloc] init];
 	_delegateProxy.firstDelegate = self;
 	super.delegate = _delegateProxy;
-	
+    [self setMovableByWindowBackground:YES];
 	_standardButtons = @[[self standardWindowButton:NSWindowCloseButton],
 						 [self standardWindowButton:NSWindowMiniaturizeButton],
 						 [self standardWindowButton:NSWindowZoomButton]];
@@ -341,7 +361,7 @@ static float kWAYWindowDefaultTrafficLightButtonsTopMargin = 0;
 	_trafficLightButtonsLeftMargin = kWAYWindowDefaultTrafficLightButtonsLeftMargin;
 	_trafficLightButtonsTopMargin = kWAYWindowDefaultTrafficLightButtonsTopMargin;
 	
-	self.hidesTitle = YES;
+	_hidesTitle = YES;
 	
 	[super setDelegate:self];
 	[self _setNeedsLayout];
@@ -352,7 +372,7 @@ static float kWAYWindowDefaultTrafficLightButtonsTopMargin = 0;
         _titleView = [[NSView alloc] init];
         _titleView.wantsLayer = YES;
         _titleView.layer.backgroundColor = [NSColor whiteColor].CGColor;
-        if(self.title)
+        if(self.title && !_hidesTitle)
         {
             self.titleLabel = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 20)];
             self.titleLabel.stringValue = self.title;
@@ -361,6 +381,8 @@ static float kWAYWindowDefaultTrafficLightButtonsTopMargin = 0;
             [self.titleLabel setFont:[NSFont systemFontOfSize:16]];
             [self.titleLabel sizeToFit];
             self.titleLabel.backgroundColor = [NSColor clearColor];
+            self.titleLabel.bordered = NO;
+            self.titleLabel.drawsBackground = NO;
 //            self.titleLabel.autoresizingMask = NSViewMinXMargin;
             
 //            CGFloat frameMidX = NSMidX(superView.frame);
@@ -388,17 +410,19 @@ static float kWAYWindowDefaultTrafficLightButtonsTopMargin = 0;
             NSLog(@"%@",NSStringFromRect(rect));
             NSLog(@"titleHeight = %f",_titleBarHeight);
             
-            CGFloat frameMidX = NSMidX(self.titleView.frame);
-            CGFloat frameHalfWidth = (NSWidth(_titleLabel.frame)/2);
-            CGFloat diff = frameMidX - frameHalfWidth;
-            
-            CGFloat frameMidy = (NSHeight(self.titleView.frame) - NSHeight(_titleLabel.frame))/2 ;
-//            - NSMidy(_titleLabel.frame);
-            _titleLabel.frame = NSMakeRect(diff,
-                                    frameMidy,
-                                    NSWidth(_titleLabel.frame),
-                                    NSHeight(_titleLabel.frame));
-            NSLog(@"label = %@",NSStringFromRect(_titleLabel.frame));
+            if(!_hidesTitle){
+                CGFloat frameMidX = NSMidX(self.titleView.frame);
+                CGFloat frameHalfWidth = (NSWidth(_titleLabel.frame)/2);
+                CGFloat diff = frameMidX - frameHalfWidth;
+                
+                CGFloat frameMidy = (NSHeight(self.titleView.frame) - NSHeight(_titleLabel.frame))/2 ;
+                _titleLabel.frame = NSMakeRect(diff,
+                                        frameMidy,
+                                        NSWidth(_titleLabel.frame),
+                                        NSHeight(_titleLabel.frame));
+                NSLog(@"label = %@",NSStringFromRect(_titleLabel.frame));
+            }
+          
         }
     }
     
@@ -421,8 +445,7 @@ static float kWAYWindowDefaultTrafficLightButtonsTopMargin = 0;
 //    h = _titleBarHeight - h;
 //    rect =NSOffsetRect(rect, 0, -h);
 //    rect.size.height =  _titleBarHeight;
-  
-    
+
 }
 
 

@@ -50,7 +50,7 @@
 @property (nonatomic) IBInspectable CGFloat trafficLightButtonsTopMargin;
 
 /// If set to YES, the title of the window will be hidden. Default: YES.
-//@property (nonatomic) IBInspectable BOOL hidesTitle;
+@property (nonatomic) IBInspectable BOOL hidesTitle;
 
 
 @property (nonatomic,strong) IBOutlet NSView *titleView;
