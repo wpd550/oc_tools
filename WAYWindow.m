@@ -201,7 +201,7 @@ static float kWAYWindowDefaultTrafficLightButtonsTopMargin = 0;
 
 - (void)awakeFromNib{
    
-    
+    self.backgroundColor = [NSColor orangeColor];
 }
 
 #pragma mark - Public
@@ -343,9 +343,20 @@ static float kWAYWindowDefaultTrafficLightButtonsTopMargin = 0;
 	[self _setNeedsLayout];
 }
 
+- (NSView *)titleView{
+    if(!_titleView){
+        _titleView = [[NSView alloc] init];
+        _titleView.wantsLayer = YES;
+        _titleView.layer.backgroundColor = [NSColor redColor].CGColor;
+    }
+    return _titleView;
+}
+
 - (void) _setNeedsLayout {
     NSRect rect = NSMakeRect(0, self.contentView.bounds.size.height - _titleBarHeight, self.contentView.bounds.size.width, _titleBarHeight);
-    if(_titleView){
+    
+   
+    if(self.titleView){
         [self.titleBarContainView setFrame:rect];
         self.titleView.frame = self.titleBarView.bounds;
         [self.titleBarView addSubview:self.titleView];

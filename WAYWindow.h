@@ -53,7 +53,7 @@
 //@property (nonatomic) IBInspectable BOOL hidesTitle;
 
 
-@property (nonatomic,weak) IBOutlet NSView *titleView;
+@property (nonatomic,strong) IBOutlet NSView *titleView;
 
 /// Replaces the window's content view with an instance of NSVisualEffectView and applies the Vibrant Dark look. Transfers all subviews to the new content view.
 - (void) setContentViewAppearanceVibrantDark;
