@@ -140,6 +140,7 @@
 
 
 @property(assign)  CGFloat delta;
+@property (strong) NSTextField *titleLabel;
 
 @end
 
@@ -202,6 +203,9 @@ static float kWAYWindowDefaultTrafficLightButtonsTopMargin = 0;
 - (void)awakeFromNib{
    
     self.backgroundColor = [NSColor orangeColor];
+    
+    
+    NSLog(@"title = %@",self.title);
 }
 
 #pragma mark - Public
@@ -337,7 +341,7 @@ static float kWAYWindowDefaultTrafficLightButtonsTopMargin = 0;
 	_trafficLightButtonsLeftMargin = kWAYWindowDefaultTrafficLightButtonsLeftMargin;
 	_trafficLightButtonsTopMargin = kWAYWindowDefaultTrafficLightButtonsTopMargin;
 	
-	self.hidesTitle = NO;
+	self.hidesTitle = YES;
 	
 	[super setDelegate:self];
 	[self _setNeedsLayout];
@@ -347,22 +351,57 @@ static float kWAYWindowDefaultTrafficLightButtonsTopMargin = 0;
     if(!_titleView){
         _titleView = [[NSView alloc] init];
         _titleView.wantsLayer = YES;
-        _titleView.layer.backgroundColor = [NSColor redColor].CGColor;
+        _titleView.layer.backgroundColor = [NSColor whiteColor].CGColor;
+        if(self.title)
+        {
+            self.titleLabel = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 200, 20)];
+            self.titleLabel.stringValue = self.title;
+            [self.titleLabel setEditable:NO];
+            [self.titleLabel setSelectable:NO];
+            [self.titleLabel setFont:[NSFont systemFontOfSize:16]];
+            [self.titleLabel sizeToFit];
+            self.titleLabel.backgroundColor = [NSColor clearColor];
+//            self.titleLabel.autoresizingMask = NSViewMinXMargin;
+            
+//            CGFloat frameMidX = NSMidX(superView.frame);
+//            CGFloat frameHalfWidth = (NSWidth(label.frame)/2);
+//            CGFloat diff = frameMidX - frameHalfWidth;
+//            label.frame = NSMakeRect(diff,
+//                                    NSMinY(label.frame),
+//                                    NSWidth(label.frame),
+//                                    NSHeight(label.frame));
+            [_titleView  addSubview:self.titleLabel];
+        }
+        
     }
     return _titleView;
 }
 
 - (void) _setNeedsLayout {
-    NSRect rect = NSMakeRect(0, self.contentView.bounds.size.height - _titleBarHeight, self.contentView.bounds.size.width, _titleBarHeight);
     
-   
-    if(self.titleView){
-        [self.titleBarContainView setFrame:rect];
-        self.titleView.frame = self.titleBarView.bounds;
-        [self.titleBarView addSubview:self.titleView];
-        NSLog(@"%@",NSStringFromRect(rect));
-        NSLog(@"titleHeight = %f",_titleBarHeight);
+    if(_titleBarHeight){
+        NSRect rect = NSMakeRect(0, self.contentView.bounds.size.height - _titleBarHeight, self.contentView.bounds.size.width, _titleBarHeight);
+        if(self.titleView){
+            [self.titleBarContainView setFrame:rect];
+            self.titleView.frame = self.titleBarView.bounds;
+            [self.titleBarView addSubview:self.titleView];
+            NSLog(@"%@",NSStringFromRect(rect));
+            NSLog(@"titleHeight = %f",_titleBarHeight);
+            
+            CGFloat frameMidX = NSMidX(self.titleView.frame);
+            CGFloat frameHalfWidth = (NSWidth(_titleLabel.frame)/2);
+            CGFloat diff = frameMidX - frameHalfWidth;
+            
+            CGFloat frameMidy = (NSHeight(self.titleView.frame) - NSHeight(_titleLabel.frame))/2 ;
+//            - NSMidy(_titleLabel.frame);
+            _titleLabel.frame = NSMakeRect(diff,
+                                    frameMidy,
+                                    NSWidth(_titleLabel.frame),
+                                    NSHeight(_titleLabel.frame));
+            NSLog(@"label = %@",NSStringFromRect(_titleLabel.frame));
+        }
     }
+    
     
 	[_standardButtons enumerateObjectsUsingBlock:^(NSButton *standardButton, NSUInteger idx, BOOL *stop) {
 		NSRect frame = standardButton.frame;
