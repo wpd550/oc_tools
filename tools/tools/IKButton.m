@@ -7,6 +7,15 @@
 //
 #import "IKButton.h"
 
+
+typedef NS_ENUM(NSInteger,MouseState){
+    MouseNormal,
+    MouseTint,
+    MouseDown,
+    MouseDisable
+};
+
+
 @interface IKButton () <CALayerDelegate>
 {
     BOOL _enableClick;
@@ -15,6 +24,7 @@
 @property (nonatomic, strong) CAShapeLayer *imageLayer;
 @property (nonatomic, strong) CATextLayer *titleLayer;
 @property (nonatomic, assign) BOOL mouseDown;
+@property (nonatomic, assign)MouseState mouseState;
 
 @end
 
@@ -45,10 +55,22 @@
 - (void)awakeFromNib {
     [super awakeFromNib];
     [self addTrackingArea:[[NSTrackingArea alloc] initWithRect:self.bounds options:NSTrackingActiveAlways|NSTrackingInVisibleRect|NSTrackingMouseEnteredAndExited owner:self userInfo:nil]];
+    self.enabled = self.enabled;
+//    [self resetWidthFrame];
 }
 
-- (void)viewWillDraw{
-    self.enabled = self.enabled;
+//- (void)viewWillDraw{
+//    [self resetWidthFrame];
+//}
+
+- (void)resetWidthFrame{
+    if(self.widthOfContraint){
+        [self sizeToFit];
+        
+        if(self.widthOfContraint.constant < NSWidth(self.frame)){
+            self.widthOfContraint.constant = NSWidth(self.frame);
+        }
+    }
 }
 
 #pragma mark - Drawing method
@@ -71,7 +93,8 @@
     self.layer.backgroundColor = [NSColor redColor].CGColor;
     self.alphaValue = self.isEnabled ? 1.0 : 0.5;
     _enableClick = YES;
-
+    _mouseState = MouseNormal;
+   
 }
 
 - (void)setupImageLayer {
@@ -245,39 +268,90 @@
     }];
 }
 
+- (void)animateColorWithMouseState:(MouseState)mouseState{
+    [self removeAllAnimations];
+    CGFloat duration =  self.onAnimateDuration;
+    NSColor *borderColor;
+    NSColor *backgroundColor;
+    NSColor *titleColor;
+    NSColor *imageColor;
+    
+    switch (mouseState) {
+        case MouseNormal:
+        {
+            borderColor     = self.borderNormalColor;
+            backgroundColor = self.backgroundNormalColor;
+            imageColor      = self.imageNormalColor;
+            titleColor      = self.titleNormalColor;
+        }break;
+        case MouseTint:{
+            borderColor     = self.borderTintColor;
+            backgroundColor = self.backgroundTintColor;
+            imageColor      = self.imageTintColor;
+            titleColor      = self.titleTintColor;
+        }break;
+        case MouseDown:{
+            borderColor     = self.borderHighlightColor;
+            backgroundColor = self.backgroundHighlightColor;
+            imageColor      = self.imageHighlightColor;
+            titleColor      = self.titleHighlightColor;
+        }break;
+        case MouseDisable:{
+            borderColor     = self.borderDisableColor;
+            backgroundColor = self.backgroundDisableColor;
+            imageColor      = self.imageDisableColor;
+            titleColor      = self.titleDisableColor;
+        }break;
+        default:
+        {
+            borderColor     = self.borderNormalColor;
+            backgroundColor = self.backgroundNormalColor;
+            imageColor      = self.imageNormalColor;
+            titleColor      = self.titleNormalColor;
+        }
+    }
+    
+    [self animateBackgroundColor:backgroundColor bordeColor:borderColor imageColor:imageColor titleColor:titleColor duration:duration];
+}
+
+
 - (void)animateColorWithState:(NSCellStateValue)state {
     [self removeAllAnimations];
     CGFloat duration = (state == NSOnState) ? self.onAnimateDuration : self.offAnimateDuration;
-    NSColor *borderColor = (state == NSOnState) ? self.borderEnteredColor : self.borderNormalColor;
-    NSColor *backgroundColor = (state == NSOnState) ? self.backgroundEnteredColor : self.backgroundNormalColor;
-    NSColor *titleColor = (state == NSOnState) ? self.titleEnteredColor : self.titleNormalColor;
-    NSColor *imageColor = (state == NSOnState) ? self.imageEnteredColor : self.imageNormalColor;
-    [self animateLayer:self.layer color:borderColor keyPath:@"borderColor" duration:duration];
-    [self animateLayer:self.layer color:backgroundColor keyPath:@"backgroundColor" duration:duration];
-    [self animateLayer:self.imageLayer color:imageColor keyPath:@"backgroundColor" duration:duration];
-    [self animateLayer:self.titleLayer color:titleColor keyPath:@"foregroundColor" duration:duration];
+    NSColor *borderColor = (state == NSOnState) ? self.borderTintColor : self.borderNormalColor;
+    NSColor *backgroundColor = (state == NSOnState) ? self.backgroundTintColor : self.backgroundNormalColor;
+    NSColor *titleColor = (state == NSOnState) ? self.titleTintColor : self.titleNormalColor;
+    NSColor *imageColor = (state == NSOnState) ? self.imageTintColor : self.imageNormalColor;
+    [self animateBackgroundColor:backgroundColor bordeColor:borderColor imageColor:imageColor titleColor:titleColor duration:duration];
 }
 
 - (void)animateColorWithEnable:(BOOL)enable {
     [self removeAllAnimations];
-    CGFloat duration = enable ? self.onAnimateDuration : self.offAnimateDuration;
     NSColor *borderColor = enable ? self.borderNormalColor : self.borderDisableColor;
     NSColor *backgroundColor = enable ? self.backgroundNormalColor : self.backgroundDisableColor;
     NSColor *titleColor = enable ? self.titleNormalColor : self.titleDisableColor;
     NSColor *imageColor =enable ? self.imageNormalColor : self.imageDisableColor;
+    CGFloat duration = enable ? self.onAnimateDuration : self.offAnimateDuration;
+
+    [self animateBackgroundColor:backgroundColor bordeColor:borderColor imageColor:imageColor titleColor:titleColor duration:duration];
+}
+
+
+- (void)animateBackgroundColor:(NSColor*)backgroundColor bordeColor:(NSColor*)borderColor imageColor:(NSColor*)imageColor titleColor:(NSColor*)titleColor duration:(CGFloat)duration{
+    [self removeAllAnimations];
     [self animateLayer:self.layer color:borderColor keyPath:@"borderColor" duration:duration];
     [self animateLayer:self.layer color:backgroundColor keyPath:@"backgroundColor" duration:duration];
     [self animateLayer:self.imageLayer color:imageColor keyPath:@"backgroundColor" duration:duration];
     [self animateLayer:self.titleLayer color:titleColor keyPath:@"foregroundColor" duration:duration];
+    
 }
-
-
 
 
 
 - (void)animateLayer:(CALayer *)layer color:(NSColor *)color keyPath:(NSString *)keyPath duration:(CGFloat)duration {
     CGColorRef oldColor = (__bridge CGColorRef)([layer valueForKeyPath:keyPath]);
     if (!(CGColorEqualToColor(oldColor, color.CGColor))) {
+//        NSLog(@"change color");
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:keyPath];
         animation.fromValue = [layer valueForKeyPath:keyPath];
         animation.toValue = (id)color.CGColor;
@@ -296,35 +370,27 @@
 
 - (void)mouseDown:(NSEvent *)event {
     if ([event clickCount] > 1 || !self.enabled){
-           return;
-       }
-       
-       self.mouseDown = YES;
-       
-       [self removeAllAnimations];
-       CGFloat duration = self.onAnimateDuration;
-       NSColor *borderColor =  self.borderHighlightColor;
-       NSColor *backgroundColor = self.backgroundHighlightColor;
-       NSColor *titleColor = self.titleHighlightColor;
-       NSColor *imageColor = self.imageHighlightColor;
-       [self animateLayer:self.layer color:borderColor keyPath:@"borderColor" duration:duration];
-       [self animateLayer:self.layer color:backgroundColor keyPath:@"backgroundColor" duration:duration];
-       [self animateLayer:self.imageLayer color:imageColor keyPath:@"backgroundColor" duration:duration];
-       [self animateLayer:self.titleLayer color:titleColor keyPath:@"foregroundColor" duration:duration];
+        return;
+    }
+    self.mouseDown = YES;
+    self.mouseState = MouseDown;
 }
 
 - (void)mouseEntered:(NSEvent *)event {
     if (self.enabled) {
-        self.state = NSOnState;
+//        self.state = NSOnState;
+        self.mouseState = MouseTint;
     }
 }
 
 - (void)mouseExited:(NSEvent *)event {
     if (self.enabled) {
-        self.state = NSOffState;
+//        self.state = NSOffState;
+        self.mouseState = MouseNormal;
     }}
 
 - (void)mouseUp:(NSEvent *)event {
+    [super mouseUp:event];
     if ([event clickCount] > 1 || !self.enabled){
         return;
     }
@@ -332,28 +398,19 @@
     if (self.mouseDown) {
         self.mouseDown = NO;
         if (self.momentary) {
-            [self removeAllAnimations];
-            CGFloat duration = self.offAnimateDuration;
-            NSColor *borderColor =  self.borderNormalColor;
-            NSColor *backgroundColor = self.backgroundNormalColor;
-            NSColor *titleColor = self.titleNormalColor;
-            NSColor *imageColor = self.imageNormalColor;
-            [self animateLayer:self.layer color:borderColor keyPath:@"borderColor" duration:duration];
-            [self animateLayer:self.layer color:backgroundColor keyPath:@"backgroundColor" duration:duration];
-            [self animateLayer:self.imageLayer color:imageColor keyPath:@"backgroundColor" duration:duration];
-            [self animateLayer:self.titleLayer color:titleColor keyPath:@"foregroundColor" duration:duration];
+            self.mouseState = MouseNormal;
+        }else{
+            self.state = NSOnState;
         }
         
         if (_enableClick) {
             _enableClick = NO;
             [NSApp sendAction:self.action to:self.target from:self];
-            NSLog(@">>> sendAction: %@, %@", self.target,NSStringFromSelector(self.action));
-            
+//            NSLog(@">>> sendAction: %@, %@", self.target,NSStringFromSelector(self.action));
+
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.01 * NSEC_PER_SEC)), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 self->_enableClick = YES;
             });
-        }else {
-            NSLog(@">>> Discard");
         }
     }
 }
@@ -373,6 +430,7 @@
 - (void)setTitle:(NSString *)title {
     [super setTitle:title];
     [self setupTitleLayer];
+    [self resetWidthFrame];
 }
 
 - (void)setImage:(NSImage *)image {
@@ -385,10 +443,18 @@
     [self animateColorWithState:state];
 }
 
+- (void)setMouseState:(MouseState)mouseState{
+    _mouseState = mouseState;
+    [self animateColorWithMouseState:mouseState];
+    
+}
+
+
+
 - (void)setEnabled:(BOOL)enabled
 {
     [super setEnabled:enabled];
-    [self animateColorWithEnable:enabled];
+    self.mouseState = enabled ? MouseNormal:MouseDisable;
 }
 
 - (void)setImagePosition:(NSCellImagePosition)imagePosition {

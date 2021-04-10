@@ -24,7 +24,7 @@ IB_DESIGNABLE
 @property (nonatomic, strong) IBInspectable NSColor *borderNormalColor;         // Default:nil  - Button's border color when state off
 @property (nonatomic, strong) IBInspectable NSColor *borderHighlightColor;      // Default:nil  - Button's border color when state on
 
-@property (nonatomic, strong) IBInspectable NSColor *borderEnteredColor;      // Default:nil  - Button's border color when mouse entered
+@property (nonatomic, strong) IBInspectable NSColor *borderTintColor;      // Default:nil  - Button's border color when mouse entered
 
 @property (nonatomic, strong) IBInspectable NSColor *borderDisableColor;      // Default:nil  - Button's border color when isenbale NO;
 
@@ -32,7 +32,7 @@ IB_DESIGNABLE
 @property (nonatomic, strong) IBInspectable NSColor *backgroundNormalColor;     // Default:nil  - Button's background color when state off
 @property (nonatomic, strong) IBInspectable NSColor *backgroundHighlightColor;  // Default:nil  - Button's background color when state on
 
-@property (nonatomic,strong) IBInspectable NSColor *backgroundEnteredColor;    // Default:nil - Button's background color when mouse entered
+@property (nonatomic,strong) IBInspectable NSColor *backgroundTintColor;    // Default:nil - Button's background color when mouse entered
 @property (nonatomic, strong) IBInspectable NSColor *backgroundDisableColor;      // Default:nil  - Button's background color when isenbale NO;
 
 
@@ -41,7 +41,7 @@ IB_DESIGNABLE
 @property (nonatomic, strong) IBInspectable NSColor *imageNormalColor;          // Default:nil  - Button's image color when state off
 @property (nonatomic, strong) IBInspectable NSColor *imageHighlightColor;       // Default:nil  - Button's image color when state on
 
-@property (nonatomic, strong) IBInspectable NSColor *imageEnteredColor;         // Default:nil  - Button's image color when mouse entered
+@property (nonatomic, strong) IBInspectable NSColor *imageTintColor;         // Default:nil  - Button's image color when mouse entered
 @property (nonatomic, strong) IBInspectable NSColor *imageDisableColor;      // Default:nil  - Button's image color when isenbale NO;
 
 
@@ -50,10 +50,13 @@ IB_DESIGNABLE
 
 @property (nonatomic, strong) IBInspectable NSColor *titleNormalColor;          // Default:nil  - Button's title color when state off
 @property (nonatomic, strong) IBInspectable NSColor *titleHighlightColor;       // Default:nil  - Button's title color when state on
-@property (nonatomic, strong) IBInspectable NSColor *titleEnteredColor;       // Default:nil  - Button's title color when mouse entered
+@property (nonatomic, strong) IBInspectable NSColor *titleTintColor;       // Default:nil  - Button's title color when mouse entered
 @property (nonatomic, strong) IBInspectable NSColor *titleDisableColor;      // Default:nil  - Button's title color when isenbale NO;
 
 
 @property (nonatomic,assign)IBInspectable  CGSize imageSize;
+
+
+@property (weak) IBOutlet NSLayoutConstraint *widthOfContraint;
 
 @end

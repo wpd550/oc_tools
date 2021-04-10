@@ -20,7 +20,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-/** This NSWindow subclass provides an interface to enable OS X 10.10 Yosemite exclusive features conveniently. Next to customizing the look of the WAYWindow content view, you can also customize the title bar and standard window buttons (`traffic lights´). The public interface is generally similar to INAppStoreWindow to facilitate the migration.
+/** This NSWindow subclass provides an interface to enable OS X 10.10 Yosemite exclusive features conveniently. Next to customizing the look of the WAYWindow content view, you can also customize the title bar and standard window buttons (`traffic lights´). The public interface is generally similar to INAppStoreWindow to simplify the migration.
  Whenever it makes sense, the properties of your WAYWindow instance in Interface Builder are inspectable.
  
  Tips:
@@ -32,20 +32,28 @@
 /// Returns YES, if the class supports vibrant appearances. Can be used to determine if running on OS X 10.10+
 + (BOOL) supportsVibrantAppearances;
 
-/// Defines the window's titlebar height.
+/// Defines the window's titlebar height. Defaut: OS X default value.
 @property (nonatomic) IBInspectable CGFloat titleBarHeight;
 
 //// Returns the titlebar view of the window, which you can add arbitrary subviews to.
 @property (strong,readonly) NSView *titleBarView;
 
-/// If set to YES, the standard window button will be vertically centered.
+@property (strong,readonly) NSView *titleBarContainView;
+
+/// If set to YES, the standard window button will be vertically centered. Default: YES.
 @property (nonatomic) IBInspectable BOOL centerTrafficLightButtons;
 
-/// Defines the left margin of the standard window buttons
+/// Defines the left margin of the standard window buttons. Defaut: OS X default value.
 @property (nonatomic) IBInspectable CGFloat trafficLightButtonsLeftMargin;
 
-/// If set to YES, the title of the window will be hidden.
+/// Defines the top margin of the standard window buttons. Used if not centered. Defaut: OS X default value.
+@property (nonatomic) IBInspectable CGFloat trafficLightButtonsTopMargin;
+
+/// If set to YES, the title of the window will be hidden. Default: YES.
 @property (nonatomic) IBInspectable BOOL hidesTitle;
+
+
+@property (nonatomic,strong) IBOutlet NSView *titleView;
 
 /// Replaces the window's content view with an instance of NSVisualEffectView and applies the Vibrant Dark look. Transfers all subviews to the new content view.
 - (void) setContentViewAppearanceVibrantDark;
